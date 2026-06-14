@@ -1,0 +1,42 @@
+# ops-worker — 사람 전용 설정 (설계: hermes-setup-guide.md §5, §6-3)
+# 중위 모델
+model:
+  default: anthropic/claude-sonnet-4.6
+
+# 파일 읽기 + git 터미널만 — 웹·실행·메시징 제거
+agent:
+  disabled_toolsets:
+    - web
+    - browser
+    - code_execution
+    - vision
+    - image_gen
+    - tts
+    - computer_use
+    - messaging
+    - cronjob
+    - delegation
+
+terminal:
+  cwd: /workspace   # 유일한 루트 cwd — 전 도메인 변경분을 보는 역할
+
+# 무인 워커 — 명령 자동 실행 (사용자 결정 2026-06-13). YAML에서 off는 boolean이라 따옴표 필수
+approvals:
+  mode: "off"
+
+# git 조회·커밋·worktree 정리까지만 자동 승인.
+# ⚠️ "git push"는 의도적으로 미포함 — 초기 2주 push 보류 정책 (개방 시점에 추가, guide §6-3)
+command_allowlist:
+  - git status
+  - git diff
+  - git log
+  - git add
+  - git commit
+  - git branch
+  - git worktree
+  - git stash
+  - ls
+  - du
+
+_config_version: 27
+timezone: Asia/Seoul

@@ -1,0 +1,24 @@
+# analyst — 사람 전용 설정 (설계: hermes-setup-guide.md §5)
+# 중위로 시작 (상위~중위 — 1주차 검수에서 품질 보고 조정)
+model:
+  default: anthropic/claude-sonnet-4.6
+
+# 웹 검색·읽기·리포트(reports/) 작성만 — 터미널·실행 제거
+agent:
+  disabled_toolsets:
+    - terminal
+    - code_execution
+    - browser
+    - vision
+    - image_gen
+    - tts
+    - computer_use
+    - messaging
+    - cronjob
+    - delegation
+
+terminal:
+  cwd: /workspace/invest
+
+_config_version: 27
+timezone: Asia/Seoul

@@ -1,0 +1,16 @@
+# .hermes: 두뇌 구조(SOUL/config/profile/.env.template)만 추적, 시크릿(.env/auth.json)·런타임(db/sessions/memories/logs/cache)은 제외
+.hermes/*
+!.hermes/profiles/
+.hermes/profiles/*/*
+!.hermes/profiles/*/SOUL.md
+!.hermes/profiles/*/config.yaml
+!.hermes/profiles/*/profile.yaml
+!.hermes/profiles/*/.env.template
+
+.claude/
+.DS_Store
+**/.DS_Store
+**/worktrees/
+**/node_modules/
+workspace/invest/data/
+*.log

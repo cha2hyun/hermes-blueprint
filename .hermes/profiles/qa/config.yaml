@@ -1,0 +1,24 @@
+# qa — 사람 전용 설정 (설계: hermes-setup-guide.md §5)
+# 중위 모델
+model:
+  default: anthropic/claude-sonnet-4.6
+
+# 읽기·검색·리포트(qa-reports/) 작성만 — 터미널·실행 제거 (검증은 명세 대조 + coder 테스트 결과 기반)
+agent:
+  disabled_toolsets:
+    - terminal
+    - code_execution
+    - browser
+    - vision
+    - image_gen
+    - tts
+    - computer_use
+    - messaging
+    - cronjob
+    - delegation
+
+terminal:
+  cwd: /workspace/dev
+
+_config_version: 27
+timezone: Asia/Seoul

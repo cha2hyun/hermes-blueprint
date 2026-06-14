@@ -1,0 +1,36 @@
+model:
+  default: anthropic/claude-sonnet-4.6
+agent:
+  disabled_toolsets:
+  - web
+  - browser
+  - vision
+  - image_gen
+  - tts
+  - computer_use
+  - messaging
+  - cronjob
+terminal:
+  cwd: /workspace/dev
+  env_passthrough:
+  - ANTHROPIC_API_KEY
+approvals:
+  mode: 'off'
+command_allowlist:
+- git
+- claude
+- npm
+- npx
+- pnpm
+- yarn
+- node
+- python
+- python3
+- pytest
+- ls
+- rg
+_config_version: 27
+timezone: Asia/Seoul
+onboarding:
+  seen:
+    tool_progress_prompt: true

@@ -1,0 +1,21 @@
+services:
+  hermes:
+    build: .
+    image: my-hermes:1.0        # 로컬 태그. push하지 않는 한 어디에도 안 올라감
+    container_name: hermes
+    restart: unless-stopped      # 게이트웨이 자동 복구
+    # Phase 2~4: CLI 작업용 상주 (entrypoint 래퍼가 실행파일 인자는 그대로 실행).
+    # 게이트웨이 기동 방식 확정(Phase 5) 후 이 커맨드를 교체한다.
+    command: ["sleep", "infinity"]
+    volumes:
+      - ~/hermes/.hermes:/opt/data         # 상태 — 공식 이미지의 HERMES_HOME (시크릿 포함, 런타임에만 보임)
+      - ~/hermes/workspace:/workspace      # 작업장
+      - ~/hermes/repos:/repos              # 코드
+    ports:
+      - "127.0.0.1:9119:9119"             # 웹 대시보드 — 반드시 127.0.0.1 바인딩 (맥에서만 접근)
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8g             # 워커 동시 실행 대비, 사용량 보고 조정
+    # ❌ 금지: environment:/env_file: 시크릿 주입 — docker inspect에 평문 노출. 시크릿은 .hermes 볼륨의 .env로만

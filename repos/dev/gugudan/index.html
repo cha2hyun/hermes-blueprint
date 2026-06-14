@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>구구단</title>
+  <style>
+    /* ── 리셋 & 기본 ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+    }
+
+    /* ── CSS 변수 — 중립 ─────────────────────────── */
+    :root {
+      --color-bg:         #f5f6fa;
+      --color-surface:    #ffffff;
+      --color-text:       #1a1a2e;
+      --color-text-muted: #6b7280;
+      --color-tab-bg:     #e8e9f0;
+      --color-tab-text:   #374151;
+      --color-border:     #d1d5db;
+      --color-shadow:     rgba(0, 0, 0, 0.10);
+    }
+
+    /* ── CSS 변수 — 단별 ─────────────────────────── */
+    [data-dan="2"] { --dan-bg: hsl(210,85%,94%); --dan-border: hsl(210,75%,55%); --dan-tab-text: #fff; --dan-shadow: hsl(210,75%,55%,0.3); }
+    [data-dan="3"] { --dan-bg: hsl(150,70%,92%); --dan-border: hsl(150,60%,42%); --dan-tab-text: #fff; --dan-shadow: hsl(150,60%,42%,0.3); }
+    [data-dan="4"] { --dan-bg: hsl(20,90%,94%);  --dan-border: hsl(20,80%,58%);  --dan-tab-text: #fff; --dan-shadow: hsl(20,80%,58%,0.3); }
+    [data-dan="5"] { --dan-bg: hsl(270,75%,94%); --dan-border: hsl(270,65%,58%); --dan-tab-text: #fff; --dan-shadow: hsl(270,65%,58%,0.3); }
+    [data-dan="6"] { --dan-bg: hsl(40,90%,92%);  --dan-border: hsl(40,80%,50%);  --dan-tab-text: #1a1a1a; --dan-shadow: hsl(40,80%,50%,0.3); }
+    [data-dan="7"] { --dan-bg: hsl(340,80%,94%); --dan-border: hsl(340,70%,58%); --dan-tab-text: #fff; --dan-shadow: hsl(340,70%,58%,0.3); }
+    [data-dan="8"] { --dan-bg: hsl(180,70%,92%); --dan-border: hsl(180,60%,40%); --dan-tab-text: #fff; --dan-shadow: hsl(180,60%,40%,0.3); }
+    [data-dan="9"] { --dan-bg: hsl(230,75%,94%); --dan-border: hsl(230,65%,55%); --dan-tab-text: #fff; --dan-shadow: hsl(230,65%,55%,0.3); }
+
+    /* ── 헤더 ────────────────────────────────────── */
+    .page-header {
+      text-align: center;
+      padding: 32px 16px 20px;
+    }
+    .page-header__title {
+      font-size: 2.0rem;
+      font-weight: 700;
+      color: var(--color-text);
+      letter-spacing: -0.02em;
+    }
+    .page-header__subtitle {
+      font-size: 1.0rem;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── 탭 바 ───────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      padding: 0 16px 24px;
+    }
+
+    .tab-btn {
+      background: var(--color-tab-bg);
+      color: var(--color-tab-text);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      font-family: inherit;
+      line-height: 1;
+    }
+    .tab-btn:hover {
+      transform: translateY(-1px);
+    }
+    .tab-btn:active {
+      transform: translateY(0);
+    }
+    .tab-btn:focus-visible {
+      outline: 2px solid var(--color-text);
+      outline-offset: 2px;
+    }
+
+    /* 숫자 탭 hover — 단별 색 20% opacity */
+    .tab-btn[data-dan]:hover {
+      background: color-mix(in hsl, var(--dan-border) 20%, transparent);
+    }
+    /* 숫자 탭 활성 */
+    .tab-btn[data-dan].tab-btn--active {
+      background: var(--dan-border);
+      color: var(--dan-tab-text);
+      border-color: var(--dan-border);
+      font-weight: 700;
+      box-shadow: 0 2px 8px var(--color-shadow);
+    }
+    .tab-btn[data-dan].tab-btn--active:focus-visible {
+      outline-color: var(--dan-border);
+    }
+    /* '전체' 탭 활성 */
+    .tab-btn--all.tab-btn--active {
+      background: var(--color-text);
+      color: #ffffff;
+      border-color: transparent;
+      font-weight: 700;
+      box-shadow: 0 2px 8px var(--color-shadow);
+    }
+
+    /* ── 콘텐츠 영역 ─────────────────────────────── */
+    .content-area {
+      opacity: 1;
+      transition: opacity 0.1s;
+    }
+    .content-area.fading {
+      opacity: 0;
+    }
+
+    /* 모드 A — 전체 그리드 */
+    .content-area--all {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 0 12px 24px;
+    }
+
+    @media (min-width: 480px) {
+      .content-area--all {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 14px;
+        padding: 0 16px 28px;
+      }
+      .tab-btn { padding: 8px 12px; }
+    }
+
+    @media (min-width: 768px) {
+      .content-area--all {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        padding: 0 24px 32px;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      .tab-btn { padding: 8px 14px; font-size: 0.95rem; }
+    }
+
+    /* 모드 B — 단일 카드 */
+    .content-area--single {
+      display: flex;
+      justify-content: center;
+      padding: 0 24px 32px;
+    }
+    .content-area--single .table-card {
+      width: 100%;
+      max-width: 480px;
+      padding: 32px 40px;
+      border-width: 4px;
+      box-shadow: 0 8px 24px var(--dan-shadow, var(--color-shadow));
+      cursor: default;
+    }
+    .content-area--single .table-card:hover {
+      transform: none;
+      box-shadow: 0 8px 24px var(--dan-shadow, var(--color-shadow));
+    }
+    .content-area--single .formula-item {
+      font-size: 1.25rem;
+    }
+
+    /* ── 단 카드 ─────────────────────────────────── */
+    .table-card {
+      background: var(--dan-bg);
+      border: 2px solid var(--dan-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 6px var(--color-shadow);
+      transition: box-shadow 0.15s, transform 0.15s;
+      cursor: pointer;
+    }
+    .table-card:hover {
+      box-shadow: 0 6px 20px var(--color-shadow);
+      transform: translateY(-2px);
+    }
+    .table-card:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px var(--color-shadow);
+    }
+    .table-card:focus-visible {
+      outline: 2px solid var(--dan-border);
+      outline-offset: 3px;
+    }
+
+    .table-card__title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--dan-border);
+      margin-bottom: 12px;
+    }
+
+    /* ── 수식 목록 ───────────────────────────────── */
+    .table-card__list {
+      list-style: none;
+    }
+
+    .formula-item {
+      display: grid;
+      grid-template-columns: 1.5ch 1.5ch 1.5ch 1.5ch 3ch;
+      gap: 4px;
+      align-items: center;
+      font-family: 'Courier New', Courier, 'Lucida Console', monospace;
+      font-size: 1.0rem;
+      line-height: 2.0;
+      color: var(--color-text);
+    }
+    .formula-item span {
+      text-align: right;
+    }
+
+    /* 모바일 탭 버튼 */
+    @media (max-width: 479px) {
+      .tab-btn { padding: 6px 10px; font-size: 0.875rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1 class="page-header__title">구구단</h1>
+    <h2 class="page-header__subtitle">2단부터 9단까지</h2>
+  </header>
+
+  <nav class="tab-bar" role="tablist" aria-label="단 선택">
+    <button class="tab-btn tab-btn--all tab-btn--active"
+            role="tab"
+            aria-pressed="true"
+            aria-label="전체 보기"
+            tabindex="0"
+            data-mode="all">전체</button>
+    <button class="tab-btn" role="tab" aria-pressed="false" aria-label="2단 보기" tabindex="0" data-dan="2">2</button>
+    <button class="tab-btn" role="tab" aria-pressed="false" aria-label="3단 보기" tabindex="0" data-dan="3">3</button>
+    <button class="tab-btn" role="tab" aria-pressed="false" aria-label="4단 보기" tabindex="0" data-dan="4">4</button>
+    <button class="tab-btn" role="tab" aria-pressed="false" aria-label="5단 보기" tabindex="0" data-dan="5">5</button>
+    <button class="tab-btn" role="tab" aria-pressed="false" aria-label="6단 보기" tabindex="0" data-dan="6">6</button>
+    <button class="tab-btn" role="tab" aria-pressed="false" aria-label="7단 보기" tabindex="0" data-dan="7">7</button>
+    <button class="tab-btn" role="tab" aria-pressed="false" aria-label="8단 보기" tabindex="0" data-dan="8">8</button>
+    <button class="tab-btn" role="tab" aria-pressed="false" aria-label="9단 보기" tabindex="0" data-dan="9">9</button>
+  </nav>
+
+  <main id="content-area" class="content-area content-area--all" aria-live="polite"></main>
+
+  <noscript>
+    <p style="text-align:center;padding:2rem;color:#6b7280;">JavaScript가 필요합니다. 브라우저의 JavaScript를 활성화해 주세요.</p>
+  </noscript>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ── 데이터 ──────────────────────────────────
+      const DANS = [2, 3, 4, 5, 6, 7, 8, 9];
+
+      // ── DOM 참조 ────────────────────────────────
+      const contentArea = document.getElementById('content-area');
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const allTabBtn = document.querySelector('.tab-btn--all');
+
+      // ── 상태 ────────────────────────────────────
+      let currentMode = 'all'; // 'all' | number(2~9)
+
+      // ── 수식 카드 HTML 생성 ───────────────────
+      function buildFormulaHTML(n, isLarge) {
+        const items = DANS.concat([]).map((_, i) => {
+          const m = i + 1;
+          const r = n * m;
+          return `<li class="formula-item" aria-label="${n} 곱하기 ${m} 는 ${r}">
+            <span class="formula-item__num">${n}</span>
+            <span class="formula-item__op">&times;</span>
+            <span class="formula-item__num">${m}</span>
+            <span class="formula-item__eq">=</span>
+            <span class="formula-item__result">${r}</span>
+          </li>`;
+        });
+        // 1부터 9까지
+        const rows = [];
+        for (let m = 1; m <= 9; m++) {
+          const r = n * m;
+          rows.push(`<li class="formula-item" aria-label="${n} 곱하기 ${m} 는 ${r}">
+            <span class="formula-item__num">${n}</span>
+            <span class="formula-item__op">&times;</span>
+            <span class="formula-item__num">${m}</span>
+            <span class="formula-item__eq">=</span>
+            <span class="formula-item__result">${r}</span>
+          </li>`);
+        }
+        return rows.join('');
+      }
+
+      function buildCard(n, clickable) {
+        const roleAttr = clickable ? 'role="button"' : '';
+        const tabAttr = clickable ? 'tabindex="0"' : 'tabindex="-1"';
+        const ariaAttr = clickable ? `aria-label="${n}단 보기"` : `aria-label="${n}단 구구단"`;
+        return `<article class="table-card" data-dan="${n}" ${roleAttr} ${tabAttr} ${ariaAttr}>
+          <h3 class="table-card__title">${n}단</h3>
+          <ul class="table-card__list">${buildFormulaHTML(n)}</ul>
+        </article>`;
+      }
+
+      // ── 렌더링 ───────────────────────────────────
+      function renderAll() {
+        contentArea.innerHTML = DANS.map(n => buildCard(n, true)).join('');
+        // 카드 클릭 이벤트
+        contentArea.querySelectorAll('.table-card').forEach(card => {
+          card.addEventListener('click', () => switchToDan(Number(card.dataset.dan)));
+          card.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              switchToDan(Number(card.dataset.dan));
+            }
+          });
+        });
+      }
+
+      function renderSingle(n) {
+        contentArea.innerHTML = buildCard(n, false);
+      }
+
+      // ── 탭 활성화 ─────────────────────────────
+      function activateTab(danOrAll) {
+        tabBtns.forEach(btn => {
+          const isTarget = danOrAll === 'all'
+            ? btn.classList.contains('tab-btn--all')
+            : btn.dataset.dan === String(danOrAll);
+          btn.classList.toggle('tab-btn--active', isTarget);
+          btn.setAttribute('aria-pressed', isTarget ? 'true' : 'false');
+        });
+      }
+
+      // ── 모드 전환 (opacity fade) ──────────────
+      function switchMode(danOrAll) {
+        if (danOrAll === currentMode) return;
+        contentArea.classList.add('fading');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // 클래스 교체
+            contentArea.classList.remove('content-area--all', 'content-area--single');
+            if (danOrAll === 'all') {
+              contentArea.classList.add('content-area--all');
+              renderAll();
+            } else {
+              contentArea.classList.add('content-area--single');
+              renderSingle(danOrAll);
+            }
+            activateTab(danOrAll);
+            currentMode = danOrAll;
+            // fade-in
+            contentArea.classList.remove('fading');
+            window.scrollTo(0, 0);
+          });
+        });
+      }
+
+      function switchToDan(n) { switchMode(n); }
+      function switchToAll() { switchMode('all'); }
+
+      // ── 탭 이벤트 연결 ────────────────────────
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('tab-btn--all')) {
+            switchToAll();
+          } else {
+            switchToDan(Number(btn.dataset.dan));
+          }
+        });
+      });
+
+      // ── 초기 렌더링 ───────────────────────────
+      renderAll();
+    })();
+  </script>
+</body>
+</html>

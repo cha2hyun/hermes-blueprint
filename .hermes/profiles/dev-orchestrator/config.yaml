@@ -1,0 +1,36 @@
+# dev-orchestrator — 사람 전용 설정 (설계: hermes-setup-guide.md §5)
+# 상위 모델: 분해·라우팅·등급 판정 품질이 전체를 좌우, 호출 빈도는 낮음
+model:
+  default: anthropic/claude-opus-4.8
+
+# kanban 툴셋: 오케스트레이터가 태스크 배정 도구(kanban_create 등)를 가지려면 필수 ("kanban" in toolsets 조건)
+toolsets:
+  - hermes-cli
+  - kanban
+
+# 배정만 한다 — 실행 도구 제거 (kanban·대화·크론 등록은 유지)
+agent:
+  disabled_toolsets:
+    - terminal
+    - file
+    - code_execution
+    - web
+    - browser
+    - vision
+    - image_gen
+    - tts
+    - computer_use
+    - delegation
+
+kanban:
+  orchestrator_profile: dev-orchestrator
+
+# 봇별 전용 채널 모델: #hermes_dev 채널에서는 멘션 없이 모든 메시지에 응답
+# auto_thread off — 전용 채널엔 봇 1개뿐이라 스레드 불필요. 채널에 직접 응답 + /sethome이 채널로 걸리게
+# 채널ID는 .env의 ${DISCORD_DEV_CHANNEL}로 분리 (blueprint 안전)
+discord:
+  free_response_channels: ${DISCORD_DEV_CHANNEL}
+  auto_thread: false
+
+_config_version: 27
+timezone: Asia/Seoul
